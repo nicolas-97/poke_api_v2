@@ -1,17 +1,25 @@
 import 'package:flutter/cupertino.dart';
+import 'package:mvvm_basic/data/models/service/pokedex_response.dart';
+import 'package:mvvm_basic/utils/api/api_client.dart';
+import 'dart:convert';
 
-class HomeViewModel {
-  TextEditingController _emailController = TextEditingController();
-  bool _isValidEmail = true;
-  TextEditingController _passwordController = TextEditingController();
+class HomeViewModel extends ChangeNotifier{
 
-  TextEditingController getEmailController() => _emailController;
-  TextEditingController getPasswordController() => _passwordController;
-  bool getIsValidEmail() => _isValidEmail;
+  List<PokedexList> pokemonList = [];
 
-  validateEmail(){
-    final email = _emailController.text;
-    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}');
-    _isValidEmail = emailRegex.hasMatch(email);
+  HomeViewModel(){
+    getAllPokemons();
   }
+  
+  getAllPokemons() async {
+    
+    final response = await ApiClient.instance().get('/api/v2/pokemon/');
+
+    PokedexResponse data = PokedexResponse.fromJson(json.decode(response.body));
+
+    pokemonList = [...pokemonList, ...data.results];
+
+    notifyListeners();
+  }
+
 }
